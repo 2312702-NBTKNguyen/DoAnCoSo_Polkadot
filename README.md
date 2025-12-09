@@ -126,7 +126,7 @@ Biên dịch runtime:
 ```bash
 polkadot-omni-node key generate-node-key \
 --base-path data \
---chain ./resources/raw_chain_spec.json
+--chain raw_chain_spec.json
 ```
 
 **Bước 2.** Khởi động collator node:
@@ -134,7 +134,7 @@ polkadot-omni-node key generate-node-key \
 ```bash
 polkadot-omni-node \
 --collator \
---chain ./resources/raw_chain_spec.json \
+--chain raw_chain_spec.json \
 --base-path data \
 --port 40333 \
 --rpc-port 8845 \
