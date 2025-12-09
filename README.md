@@ -1,85 +1,330 @@
-# DoAnCoSo
-DACS_02_Tìm hiểu ngôn ngữ lập trình Rust và nền tảng blockchain Polkadot
-Toàn bộ hướng dẫn bên dưới đều tham khảo từ trang chủ chính thức của Polkadot: https://docs.polkadot.com/
-Tất cả các dòng lệnh cần phải triển khai trên Terminal của hệ thống
+# DoAnCoSo_Polkadot
+DACS_02_Tìm hiểu ngôn ngữ lập trình Rust và nền tảng blockchain Polkadot.
 
-1. Cài đặt phụ thuộc của Polkadot SDK
-a) Linux (Ubuntu)
+> - [Mã nguồn](https://github.com/2312702-NBTKNguyen/DoAnCoSo_Polkadot.git) được lưu trữ tại: https://github.com/2312702-NBTKNguyen/DoAnCoSo_Polkadot.git
+> - Toàn bộ hướng dẫn bên dưới được tham khảo từ [Tài liệu chính thức của Polkadot](https://docs.polkadot.com/). 
+> - Tất cả các dòng lệnh cần được thực thi trên **Terminal** (Linux) hoặc **WSL** (Windows).
+
+## 1. Cài đặt các thành phần phụ thuộc (Dependencies)
+
+Trước khi bắt đầu, đảm bảo hệ thống đã được cài đặt các thư viện cần thiết.
+
+### a) Đối với Linux (Ubuntu)
+
+```bash
+# Cài đặt các gói build cơ bản
 sudo apt install build-essential
 
+# Cài đặt các thư viện phụ thuộc
 sudo apt install --assume-yes git clang curl libssl-dev protobuf-compiler
 
+# Cài đặt Rustup (Trình quản lý phiên bản Rust)
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
+# Cập nhật biến môi trường
 source $HOME/.cargo/env
 
+# Cập nhật Rust và thêm target WASM
 rustup default stable
 rustup update
 rustup target add wasm32-unknown-unknown
 rustup component add rust-src
+```
 
-b) Windows (WSL)
+### b) Đối với Windows (WSL)
+
+```bash
+# Cài đặt WSL (nếu chưa có)
 wsl --install
 
+# Cập nhật danh sách gói
 sudo apt update
 
+# Cài đặt các thư viện phụ thuộc
 sudo apt install --assume-yes git clang curl libssl-dev llvm libudev-dev make protobuf-compiler
 
+# Cài đặt Rustup
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
-source ~/.cargo/env
+# Cập nhật biến môi trường
+source $HOME/.cargo/env
 
+# Cập nhật Rust và thêm target WASM
 rustup default stable
 rustup update
 rustup target add wasm32-unknown-unknown
 rustup component add rust-src
+```
 
-2. Cài đặt toolchain
+## 2. Cài đặt toolchain
+
+Cài đặt phiên bản Rust cụ thể (1.86.0) để đảm bảo tính tương thích.
+
+```bash
 rustup toolchain install 1.86.0
 rustup default 1.86.0
 rustup target add wasm32-unknown-unknown --toolchain 1.86.0
 rustup component add rust-src --toolchain 1.86.0
+```
 
-3. Cài đặt công cụ tiện ích
-a) Chain spec builder: Tiện ích SDK Polkadot để tạo thông số kỹ thuật chuỗi.
-cargo install --locked staging-chain-spec-builder@10.0.0
-b) Polkadot Omni Node: A white-labeled binary, released as a part of Polkadot SDK that can act as the collator of a parachain in production, with all the related auxiliary functionalities that a normal collator node has: RPC server, archiving state, etc. Moreover, it can also run the wasm blob of the parachain locally for testing and development.
-cargo install --locked polkadot-omni-node@0.5.0
+## 3. Cài đặt công cụ tiện ích
 
-4. Cài đặt dự án
-a) Sao chép kho lưu trữ mẫu:
-git clone https://github.com/2312702-NBTKNguyen/DoAnCoSo.git
-b) Điều hướng đến thư mục dự án:
-cd DoAnCoSo
-c) Biên dịch Runtime:
-cargo build --release
-*Notes: Thời gian biên dịch phụ thuộc vào cấu hình của máy, thông thường sẽ mất khoảng 20 - 90p tùy vào điều kiện thực tế.
+- **Chain spec builder** (Tiện ích Polkadot SDK dùng để tạo thông số kỹ thuật chuỗi):
 
-5. Triển khai lên Testnet Paseo
-a) Bắt đầu với 1 tài khoản và tokens:
-B1: Chuẩn bị tài khoản
-1. Truy cập https://polkadot.js.org/apps/?rpc=wss://paseo.dotters.network#/explorer
-2. Điều hướng đến phần Accounts :
-- Nhấp vào tab Accounts ở menu trên cùng.
-- Chọn tùy chọn Accounts từ menu thả xuống.
-4. Nhấp vào nút From JSON để thêm tài khoản đã được chuẩn bị sẵn tại thư mục ./DoAnCoSo/accounts; Mật khẩu: 123456
-5. Sau khi thêm tài khoản thành công, bấm vào tài khoản để sao chép địa chỉ của tài khoản
-6. Để có thể thực hiện bất kỳ hành động nào như tương tác và giao dịch trên Testnet, cần có token PAS dùng cho mục đích thử nghiệm. 
-Truy cập https://faucet.polkadot.io/, chọn thông tin các trường, bao gồm:
-- Network: Polkadot testnet (Paseo)
-- Chain: Paseo Relay
-- Paseo Address: dán địa chỉ tài khoản đã sao chép, sau đó nhấn nút Get some PASs
-Sau vài giây, 5000 tokens PAS sẽ được thêm vào tài khoản.
-7. Từ đây, có 2 hướng để quý thầy/cô và các bạn có thể thử nghiệm đồ án: sử dụng tài nguyên nhóm đã chuẩn bị sẵn, hoặc thử nghiệm trên 1 Parachain Identifier(Para ID) cùng với Parathread của riêng mình.
-Cách 1: Sử dụng tài nguyên nhóm đã chuẩn bị sẵn:
-- Bắt đầu với 1 node Collator: Trước khi bắt đầu 1 node Collator, cần tạo một khóa nút (node key). Khóa này chịu trách nhiệm giao tiếp với các nút khác qua Libp2p
+  ```bash
+  cargo install --locked staging-chain-spec-builder@10.0.0
+  ```
 
+- **Polkadot Omni Node**: Tệp nhị phân nhãn trắng (white-labeled binary), được phát hành như một phần của bộ công cụ Polkadot SDK, có thể đóng vai trò là người thu thập (collator) cho một parachain trong môi trường sản xuất. Nó sở hữu tất cả các chức năng phụ trợ liên quan mà một nút collator thông thường có như: máy chủ RPC, lưu trữ trạng thái, v.v. Hơn nữa, nó cũng có thể chạy tệp wasm (wasm blob) của parachain ngay trên môi trường cục bộ để phục vụ cho việc kiểm thử và phát triển.
+
+  ```bash
+  cargo install --locked polkadot-omni-node@0.5.0
+  ```
+
+## 4. Cài đặt dự án
+
+Sử dụng mã nguồn được lưu trữ trong thư mục `./Polkadot` 
+**Hoặc** Sao chép kho lưu trữ mẫu:
+
+   ```bash
+   git clone https://github.com/2312702-NBTKNguyen/DoAnCoSo_Polkadot.git
+
+   # Điều hướng đến thư mục dự án:
+   cd DoAnCoSo_Polkadot
+   ```
+
+Biên dịch runtime:
+
+   ```bash
+  # Điều hướng đến thư mục dự án:
+   cargo build --release
+   ```
+
+> Ghi chú: Thời gian biên dịch phụ thuộc vào cấu hình máy (khoảng 20–90 phút).
+
+## 5. Triển khai lên Testnet Paseo
+
+### 5.1. Chuẩn bị tài khoản và token
+
+1. Truy cập địa chỉ: https://polkadot.js.org/apps/?rpc=wss://paseo.dotters.network#/explorer.
+   Đây cũng chính là giao diện Web chính thức của `Polkadot.js Apps`
+2. Vào mục Accounts (tab Accounts → Accounts).
+3. Chọn **From JSON** để nhập tài khoản trong `./DoAnCoSo_Polkadot/accounts` (password: `123456`).
+4. Sao chép địa chỉ tài khoản vừa thêm bằng cách nhấp chuột vào tên tài khoản → Copy.
+5. Nhận PAS test token tại https://faucet.polkadot.io/ với cấu hình:
+   - Network: Polkadot testnet (Paseo)
+   - Chain: Paseo Relay
+   - Paseo Address: dán địa chỉ vừa sao chép, sau đó chọn **Get some PASs**
+6. Sau khi nhận token, quý thầy/cô và các bạn có thể chọn một trong hai hướng thử nghiệm:
+   - **Cách 1:** Sử dụng tài nguyên do nhóm chuẩn bị sẵn.
+   - **Cách 2:** Đăng ký Para ID và Parathread riêng.
+
+### 5.2. Cách 1 – Sử dụng tài nguyên sẵn có
+
+**Bước 1.** Tạo khóa nút (node key). Khóa này chịu trách nhiệm giao tiếp với các nút khác qua Libp2p:
+
+```bash
+polkadot-omni-node key generate-node-key \
+--base-path data \
+--chain ./resouces/raw_chain_spec.json
+```
+
+**Bước 2.** Khởi động collator node:
+
+```bash
+polkadot-omni-node \
+--collator \
+--chain ./resouces/raw_chain_spec.json \
+--base-path ./resouces/data \
+--port 40333 \
+--rpc-port 8845 \
+--force-authoring \
+--node-key-file ./resouces/data/chains/DACS-CTK47B/network/secret_ed25519 \
+-- \
+--sync warp \
+--chain paseo \
+--port 50343 \
+--rpc-port 9988
+```
+
+**Bước 3.** Chèn session key vào collator:
+
+```bash
+curl -H "Content-Type: application/json" \
+--data '{
+  "jsonrpc":"2.0",
+  "method":"author_insertKey",
+  "params":[
+    "aura",
+    "soul light hawk decline crane deputy universe unable seven save keen clap",
+    "0x629f56793f8b376c490da7c63a704f186fb60d44e0a4145eb19ea0b93506dd27"
+  ],
+  "id":1
+}' \
+http://localhost:8845
+```
+
+Kết quả mong đợi: `{ "jsonrpc":"2.0", "result":null, "id":1 }`.
+
+> **Session keys** giúp định danh collator khi sản xuất block và nên được xoay vòng thường xuyên để tránh rủi ro lộ khóa.
+
+**Session key mẫu đã chuẩn bị:**
+
+```
+Secret phrase:       soul light hawk decline crane deputy universe unable seven save keen clap
+Network ID:          substrate
+Secret seed:         0x8f42e4e88d602039636018b11916a15b9429f4fd3040717267a3dbbc71981747
+Public key (hex):    0x629f56793f8b376c490da7c63a704f186fb60d44e0a4145eb19ea0b93506dd27
+Account ID:          0x629f56793f8b376c490da7c63a704f186fb60d44e0a4145eb19ea0b93506dd27
+Public key (SS58):   5EJ1tAuSoUxKRKRYTcttRy7o9fBq96a58CTKuroZMF96tNSg
+SS58 Address:        5EJ1tAuSoUxKRKRYTcttRy7o9fBq96a58CTKuroZMF96tNSg
+```
+
+### 5.3. Cách 2 – Para ID và Parathread riêng
+
+**a) Đặt trước Para ID**
+
+- Vào tab **Network → Parachains** trên Polkadot.js Apps.
+- Chọn tab **Parathreads** và nhấp **+ ParaId**.
+- Xác nhận giao dịch (lưu ý ParaId), nhấn **+ Submit**.
+- Kiểm tra tab **Explorer** để tìm sự kiện `registrar.Reserved` xác nhận thành công.
+
+**b) Chuẩn bị khóa cho collator**
+
+- Sử dụng tài khoản đã nhập ở bước 5.1 làm account key.
+- Tạo session key chuyên dụng:
+
+  ```bash
+  subkey generate --scheme sr25519
+  ```
+- Lưu toàn bộ thông số để tiếp tục tham khảo sau.
+
+**c) Định nghĩa chain specification**
+
+- plain chain spec giới thiệu cấu hình dễ đọc; raw chain spec dùng để khởi chạy node.
+- Tạo plain chain spec:
+
+  ```bash
+  chain-spec-builder \
+  --chain-spec-path ./plain_chain_spec.json \
+  create \
+  --relay-chain paseo \
+  --para-id INSERT_PARA_ID \
+  --runtime target/release/wbuild/dacs-runtime/dacs_runtime.compact.compressed.wasm \
+  named-preset local_testnet
+  ```
+
+- Chỉnh sửa `plain_chain_spec.json`:
+
+  1. Đặt `name` và `id` thành giá trị duy nhất.
+  2. Cập nhật `para_id` và `parachainInfo.parachainId` bằng Para ID đã đăng ký (dạng số).
+  3. Khai báo số dư khởi tạo trong `balances` bằng địa chỉ SS58 đã chuẩn bị.
+  4. Thêm địa chỉ collator và session key vào `collatorSelection.invulnerables` và `session.keys.aura` (đều là SS58).
+  5. Chỉ định tài khoản sudo trong trường `sudo`.
+
+- Kết quả sẽ tương tự như phía dưới, hoặc tham khảo trong `./resouces/plain_chain_spec.json`:
+```bash
+{
+    "bootNodes": [],
+    "chainType": "Live",
+    "codeSubstitutes": {},
+    "genesis": {
+        "runtimeGenesis": {
+            "code": "0x...",
+            "patch": {
+                "aura": {
+                    "authorities": []
+                },
+                "auraExt": {},
+                "balances": {
+                    "balances": [["INSERT_SUDO_ACCOUNT", 1152921504606846976]]
+                },
+                "collatorSelection": {
+                    "candidacyBond": 16000000000,
+                    "desiredCandidates": 0,
+                    "invulnerables": ["INSERT_ACCOUNT_ID_COLLATOR_1"]
+                },
+                "parachainInfo": {
+                    "parachainId": "INSERT_PARA_ID"
+                },
+                "parachainSystem": {},
+                "polkadotXcm": {
+                    "safeXcmVersion": 5
+                },
+                "session": {
+                    "keys": [
+                        [
+                            "INSERT_ACCOUNT_ID_COLLATOR_1",
+                            "INSERT_ACCOUNT_ID_COLLATOR_1",
+                            {
+                                "aura": "INSERT_SESSION_KEY_COLLATOR_1"
+                            }
+                        ]
+                    ],
+                    "nonAuthorityKeys": []
+                },
+                "sudo": {
+                    "key": "INSERT_SUDO_ACCOUNT"
+                },
+                "system": {},
+                "transactionPayment": {
+                    "multiplier": "1000000000000000000"
+                }
+            }
+        }
+    },
+    "id": "INSERT_ID",
+    "name": "INSERT_NAME",
+    "para_id": "INSERT_PARA_ID",
+    "properties": {
+        "tokenDecimals": 12,
+        "tokenSymbol": "UNIT"
+    },
+    "protocolId": "INSERT_PROTOCOL_ID",
+    "relay_chain": "paseo",
+    "telemetryEndpoints": null
+}
+```
+
+- Chuyển đổi tập tin `plain_chain_spec.json` đã sửa đổi thành tập tin `raw_chain_spec.json` (tệp thông số kỹ thuật chuỗi thô):
+
+  ```bash
+  chain-spec-builder \
+  --chain-spec-path ./raw_chain_spec.json \
+  convert-to-raw plain_chain_spec.json
+  ```
+
+**d) Xuất runtime Wasm và genesis state**
+
+```bash
+polkadot-omni-node export-genesis-wasm \
+--chain raw_chain_spec.json para-wasm
+
+polkadot-omni-node export-genesis-head \
+--chain raw_chain_spec.json para-state
+```
+
+**e) Đăng ký Parathread**
+
+- Tại tab **Parachains → Parathreads**, nhấp **+ Parathread**.
+- Cung cấp Para ID cùng hai tệp `para-wasm` và `para-state` vừa xuất.
+- Kiểm tra thông tin, nhấn **+ Submit** để tạo Parathread mới (nút Deregister sẽ xuất hiện sau khi đăng ký).
+- Thời gian tích hợp thành Parathread hoàn chỉnh có thể kéo dài ~2 giờ.
+
+> f) Bắt đầu nút Collator:
+Bước này sẽ tương tự như bước 5.2.
+
+- Tạo khóa nút (node key):
+
+```bash
 polkadot-omni-node key generate-node-key \
 --base-path data \
 --chain raw_chain_spec.json
+```
 
-- Sau đó, bắt đầu node Collator thông qua chuỗi lệnh sau:
+- Khởi động collator node:
 
+```bash
 polkadot-omni-node \
 --collator \
 --chain raw_chain_spec.json \
@@ -93,98 +338,26 @@ polkadot-omni-node \
 --chain paseo \
 --port 50343 \
 --rpc-port 9988
+```
 
-- Sau khi node Collator đã khởi chạy thành công, bước tiếp theo là chèn khóa phiên (Session key*) vào node Collator. Mở một cửa sổ Terminal mới và nhập chuỗi lệnh sau:
+- Chèn session key vào collator (Quan trọng):
+Thay thế `INSERT_SECRET_PHRASE` và `INSERT_PUBLIC_KEY_HEX_FORMAT` bằng các giá trị từ session key đã tạo trong phần 5.3.b)
 
+```bash
 curl -H "Content-Type: application/json" \
 --data '{
-  "jsonrpc":"2.0",
-  "method":"author_insertKey",
-  "params":[
-    "aura",
-    "soul light hawk decline crane deputy universe unable seven save keen clap",
-    "0x629f56793f8b376c490da7c63a704f186fb60d44e0a4145eb19ea0b93506dd27"
-  ],
-  "id":1
+  "jsonrpc":"2.0",
+  "method":"author_insertKey",
+  "params":[
+    "aura",
+    "INSERT_SECRET_PHRASE",
+    "INSERT_PUBLIC_KEY_HEX_FORMAT"
+  ],
+  "id":1
 }' \
 http://localhost:8845
+```
 
-Kết quả của đoạn lệnh trên sẽ tương tự như thế này: {"jsonrpc":"2.0","result":null,"id":1}
+Kết quả mong đợi: `{ "jsonrpc":"2.0", "result":null, "id":1 }`.
 
-*Session keys (Khóa phiên): Used in block production to identify your node and its blocks on the network. These keys are stored in the parachain keystore and function as disposable "hot wallet" keys. If these keys are leaked, someone could impersonate your node, which could result in the slashing of your funds. To minimize these risks, rotating your session keys frequently is essential. Treat them with the same level of caution as you would a hot wallet to ensure the security of your node.
-
-*Đây là Session key đã được chuẩn bị sẵn:
-Secret phrase:       soul light hawk decline crane deputy universe unable seven save keen clap
-  Network ID:        substrate
-  Secret seed:       0x8f42e4e88d602039636018b11916a15b9429f4fd3040717267a3dbbc71981747
-  Public key (hex):  0x629f56793f8b376c490da7c63a704f186fb60d44e0a4145eb19ea0b93506dd27
-  Account ID:        0x629f56793f8b376c490da7c63a704f186fb60d44e0a4145eb19ea0b93506dd27
-  Public key (SS58): 5EJ1tAuSoUxKRKRYTcttRy7o9fBq96a58CTKuroZMF96tNSg
-  SS58 Address:      5EJ1tAuSoUxKRKRYTcttRy7o9fBq96a58CTKuroZMF96tNSg
-
-Cách 2: Thử nghiệm trên 1 Parachain Identifier(Para ID) cùng với Parathread của riêng mình.
-a) Đặt trước 1 mã định danh Parachain (Parachain Identifier - Para ID):
-- Điều hướng đến phần Parachains:
-    Nhấp vào tab Network ở menu trên cùng.
-    Chọn tùy chọn Parachains từ menu thả xuống.
-- Đăng ký ParaId:
-    Chọn tab Parathreads.
-    Nhấp vào nút "+ ParaId".
-- Xem lại giao dịch (đặc biệt là ParaId) và nhấp vào nút "+ Submit".
-- Sau khi gửi giao dịch, có thể điều hướng đến tab Explorer và kiểm tra danh sách các sự kiện gần đây để biết giao dịch thành công thông qua sự kiện "registrar.Reserved".
-
-b) Tạo khóa phiên (Session key) cho node Collator: Để triển khai parachain một cách an toàn, đây là điều cần thiết là tạo khóa tùy chỉnh dành riêng cho các Collator (nhà sản xuất khối). Ở đây, sẽ cần 2 bộ khóa cho mỗi collator:
-- Account keys: Được sử dụng để tương tác với mạng và quản lý tiền. Ở đây, để thuận tiện, quý thầy/cô và các bạn nên sử dụng địa chỉ tài khoản đã được thêm trong Polkadot.js Apps ở mục 4.
-- Session key: Tương tự như đã giải thích ở mục 7, có thể tạo thông qua lệnh: 
-
-subkey generate --scheme sr25519
-
-
-
-c) Khởi tạo 1 mã định danh chuỗi (Chain Specification):
-Các blockchain dựa trên Polkadot SDK được định nghĩa bằng một tệp gọi là chain specification (thông số kỹ thuật chuỗi), hay gọi tắt là chain spec. Có hai loại tệp chain spec:
-- Plain chain spec : Tệp JSON dễ đọc, có thể được chỉnh sửa để phù hợp với yêu cầu của parachain. Tệp này đóng vai trò là mẫu cho cấu hình ban đầu và bao gồm các khóa và cấu trúc dễ đọc.
-- Raw Chain Spec : Tệp được mã hóa nhị phân dùng để khởi động nút parachain của bạn. Tệp này được tạo từ thông số kỹ thuật chuỗi đơn giản và chứa thông tin được mã hóa cần thiết để nút parachain đồng bộ hóa với mạng blockchain. Nó đảm bảo khả năng tương thích giữa các phiên bản runtime khác nhau bằng cách cung cấp dữ liệu ở định dạng mà runtime của nút có thể diễn giải trực tiếp, bất kể các bản nâng cấp kể từ khi chuỗi được hình thành.
-
-Để định nghĩa Chain Specification:
-- Khởi tạo Plain chain specification cho node thông qua chuỗi lệnh:
-
-chain-spec-builder \
---chain-spec-path ./plain_chain_spec.json \
-create \
---relay-chain paseo \
---para-id INSERT_PARA_ID \
---runtime target/release/wbuild/dacs-runtime/dacs_runtime.compact.compressed.wasm \
-named-preset local_testnet
-
-* Thay đổi trường INSERT_PARA_ID bằng mã định danh Parachain (Para ID) đã đăng ký trước đó ở mục a)
-
-- Chỉnh sửa tập tin plain_chain_spec.json:
-1. Cập nhật các trường "name, id" thành các giá trị duy nhất cho parachain (Tùy chỉnh theo mong muốn).
-2. Thay đổi các trường "para_id, parachainInfo.parachainId" thành ID Parachain đã đăng ký trước đó. Đảm bảo sử dụng số không có dấu ngoặc kép.
-3. Sửa đổi trường "balances" bằng địa chỉ tài khoản đã chuẩn bị sẵn cùng số dư ban đầu (mặc định) cho tài khoản theo định dạng SS58. 
-4. Tiếp tục sử dụng địa chỉ tài khoản đã chuẩn bị sẵn để chèn vào trường "collatorSelection.invulnerables" cùng khóa phiên (Session key) theo định dạng SS58 để chèn vào trường "session.keys.aura".
-5. Sửa đổi trường "sudo" để chỉ định tài khoản sẽ có quyền truy cập sudo vào parachain. Ở đây, tiếp tục sử dụng địa chỉ tài khoản đã chuẩn bị sẵn.
-- Lưu tập tin và đóng tệp.
-- Chuyển đổi tập tin plain_chain_spec.json đã sửa đổi thành tập tin raw_chain_spec.json (tệp thông số kỹ thuật chuỗi thô):
-
-chain-spec-builder \
---chain-spec-path ./raw_chain_spec.json \
-convert-to-raw plain_chain_spec.json
-
-d) Xuất các tập tin cần thiết:
-Để chuẩn bị cho Parachain collator có thể đăng ký trên Paseo Testnet, cần 2 chuỗi quan trọng là Runtime Wasm và trạng thái genesis (genesis state). Xuất 2 tập tin thông qua 2 nhóm lệnh sau:
-
-polkadot-omni-node export-genesis-wasm \
---chain raw_chain_spec.json para-wasm
-
-polkadot-omni-node export-genesis-head \
---chain raw_chain_spec.json para-state
-
-e) Đăng ký Parathread:
-- Vào tab Parachains > Parathreads và chọn "+ Parathread".
-- Chọn 2 tập tin đã xuất vào các trường để đặt trạng thái Wasm và trạng thái genesis tương ứng, cùng với ID Parachain.
-Xác nhận thông tin chi tiết và nút "+ Submit", tại đó sẽ có một Parathread mới có ID Parachain tương ứng và nút Deregister đang hoạt động.
-*Notes: Thời gian để Parachain được tích hợp và trở thành Parathread cần mất khoảng 2 giờ đồng hồ.
-
-f) 
+Sau khi collator được đồng bộ hóa với chuỗi chuyển tiế (RelayChain) Paseo và parathread hoàn tất việc tích hợp, khi đó sẽ sẵn sàng để bắt đầu tạo khối. Quá trình này có thể mất một chút thời gian.
