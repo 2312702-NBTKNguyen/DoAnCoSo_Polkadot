@@ -126,7 +126,7 @@ Biên dịch runtime:
 ```bash
 polkadot-omni-node key generate-node-key \
 --base-path data \
---chain ./resouces/raw_chain_spec.json
+--chain ./resources/raw_chain_spec.json
 ```
 
 **Bước 2.** Khởi động collator node:
@@ -134,12 +134,12 @@ polkadot-omni-node key generate-node-key \
 ```bash
 polkadot-omni-node \
 --collator \
---chain ./resouces/raw_chain_spec.json \
---base-path ./resouces/data \
+--chain ./resources/raw_chain_spec.json \
+--base-path data \
 --port 40333 \
 --rpc-port 8845 \
 --force-authoring \
---node-key-file ./resouces/data/chains/DACS-CTK47B/network/secret_ed25519 \
+--node-key-file ./data/chains/DACS-CTK47B/network/secret_ed25519 \
 -- \
 --sync warp \
 --chain paseo \
@@ -311,7 +311,7 @@ polkadot-omni-node export-genesis-head \
 - Kiểm tra thông tin, nhấn **+ Submit** để tạo Parathread mới (nút Deregister sẽ xuất hiện sau khi đăng ký).
 - Thời gian tích hợp thành Parathread hoàn chỉnh có thể kéo dài ~2 giờ.
 
-> f) Bắt đầu nút Collator:
+**f) Bắt đầu nút Collator**
 Bước này sẽ tương tự như bước 5.2.
 
 - Tạo khóa nút (node key):
@@ -360,4 +360,6 @@ http://localhost:8845
 
 Kết quả mong đợi: `{ "jsonrpc":"2.0", "result":null, "id":1 }`.
 
-Sau khi collator được đồng bộ hóa với chuỗi chuyển tiế (RelayChain) Paseo và parathread hoàn tất việc tích hợp, khi đó sẽ sẵn sàng để bắt đầu tạo khối. Quá trình này có thể mất một chút thời gian.
+Sau khi collator được đồng bộ hóa với chuỗi chuyển tiếp (RelayChain) Paseo và Parathread hoàn tất việc tích hợp, khi đó sẽ sẵn sàng để bắt đầu tạo khối.
+
+### 5.4. 

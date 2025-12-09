@@ -2,4 +2,4 @@
 /**/*.tmp
 /**/*.log
 /**/*.lock
-/resources/data
+/data

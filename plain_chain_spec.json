@@ -9,7 +9,7 @@
         "balances": {
           "balances": [
             [
-              "13VgK6GMZvZEkBCHYYrFPtrqYYaD5CuK3x7efZmQeqbX4vW6",
+              "1BhiYp6AVj51zx9e98zV7CLgtMdk1bqY8MWrwZxkxip9CXf",
               1152921504606846976
             ]
           ]
@@ -17,11 +17,11 @@
         "collatorSelection": {
           "candidacyBond": 16000000,
           "invulnerables": [
-            "13VgK6GMZvZEkBCHYYrFPtrqYYaD5CuK3x7efZmQeqbX4vW6"
+            "1BhiYp6AVj51zx9e98zV7CLgtMdk1bqY8MWrwZxkxip9CXf"
           ]
         },
         "parachainInfo": {
-          "parachainId": 5096
+          "parachainId": 5100
         },
         "polkadotXcm": {
           "safeXcmVersion": 5
@@ -29,8 +29,8 @@
         "session": {
           "keys": [
             [
-              "13VgK6GMZvZEkBCHYYrFPtrqYYaD5CuK3x7efZmQeqbX4vW6",
-              "13VgK6GMZvZEkBCHYYrFPtrqYYaD5CuK3x7efZmQeqbX4vW6",
+              "1BhiYp6AVj51zx9e98zV7CLgtMdk1bqY8MWrwZxkxip9CXf",
+              "1BhiYp6AVj51zx9e98zV7CLgtMdk1bqY8MWrwZxkxip9CXf",
               {
                 "aura": "5EJ1tAuSoUxKRKRYTcttRy7o9fBq96a58CTKuroZMF96tNSg"
               }
@@ -38,14 +38,14 @@
           ]
         },
         "sudo": {
-          "key": "13VgK6GMZvZEkBCHYYrFPtrqYYaD5CuK3x7efZmQeqbX4vW6"
+          "key": "1BhiYp6AVj51zx9e98zV7CLgtMdk1bqY8MWrwZxkxip9CXf"
         }
       }
     }
   },
   "id": "DACS-CTK47B",
   "name": "ĐỒ ÁN CƠ SỞ - CTK47B",
-  "para_id": 5096,
+  "para_id": 5100,
   "properties": {
     "tokenDecimals": 12,
     "tokenSymbol": "UNIT"
