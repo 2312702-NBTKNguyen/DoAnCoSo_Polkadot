@@ -83,7 +83,7 @@ rustup component add rust-src --toolchain 1.86.0
 
 ## 4. Cài đặt dự án
 
-Sử dụng mã nguồn được lưu trữ trong thư mục `./Polkadot` 
+Sử dụng mã nguồn được lưu trữ trong thư mục `./DoAnCoSo_Polkadot` 
 **Hoặc** Sao chép kho lưu trữ mẫu:
 
    ```bash
@@ -222,7 +222,7 @@ SS58 Address:        5EJ1tAuSoUxKRKRYTcttRy7o9fBq96a58CTKuroZMF96tNSg
   4. Thêm địa chỉ collator và session key vào `collatorSelection.invulnerables` và `session.keys.aura` (đều là SS58).
   5. Chỉ định tài khoản sudo trong trường `sudo`.
 
-- Kết quả sẽ tương tự như phía dưới, hoặc tham khảo trong `./resouces/plain_chain_spec.json`:
+- Kết quả sẽ tương tự như phía dưới, hoặc tham khảo trong `./plain_chain_spec.json`:
 ```bash
 {
     "bootNodes": [],
