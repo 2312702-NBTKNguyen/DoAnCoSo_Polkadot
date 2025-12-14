@@ -545,7 +545,7 @@ https://polkadot.js.org/apps/?rpc=ws://localhost:8845#/extrinsics
 ├─────────────────────────────────────────────────────────────┤
 │  Extrinsic: blog.createPost                                 │
 │  title: "Hello Polkadot"                                    │
-│  content: "This is my first blog post on parachain!"        │
+│  content: "First blog post"                                 │
 └─────────────────────────────────────────────────────────────┘
 ```
 
