@@ -506,15 +506,6 @@ Có hai phương thức để sở hữu Coretime:
 > - Mỗi order chỉ có hiệu lực cho một block
 > - Order sẽ được xử lý theo thứ tự hàng đợi (queue)
 
-**So sánh On-demand vs Bulk Coretime:**
-
-| Tiêu chí | On-demand | Bulk |
-|----------|-----------|------|
-| Chi phí | Theo block | Theo tháng (28 ngày) |
-| Phù hợp với | Dự án mới, traffic thấp | Dự án ổn định, traffic cao |
-| Rủi ro giá | Biến động theo nhu cầu | Cố định sau khi mua |
-| Yêu cầu | Đặt order liên tục | Mua một lần, dùng cả tháng |
-
 ### 5.5. Demo: Thực hiện giao dịch với Blog Pallet
 
 Phần này hướng dẫn cách demo việc tạo giao dịch trên parachain và sử dụng on-demand coretime để đưa giao dịch lên block.
@@ -541,7 +532,7 @@ https://polkadot.js.org/apps/?rpc=ws://localhost:8845#/extrinsics
 1. Chuyển sang **Tab 2** (kết nối `ws://localhost:8845`)
 2. Vào **Developer → Extrinsics**
 3. Chọn tài khoản có token (ví dụ: tài khoản sudo)
-4. Chọn extrinsic: `blogPallet` → chọn hàm muốn gọi, ví dụ:
+4. Chọn extrinsic: `blog` → chọn hàm muốn gọi, ví dụ:
    - `createPost(title, content)` - Tạo bài viết mới
    - `updatePost(postId, title, content)` - Cập nhật bài viết
    - `deletePost(postId)` - Xóa bài viết
@@ -552,7 +543,7 @@ https://polkadot.js.org/apps/?rpc=ws://localhost:8845#/extrinsics
 ┌─────────────────────────────────────────────────────────────┐
 │  Tab 2: Parachain (ws://localhost:8845)                     │
 ├─────────────────────────────────────────────────────────────┤
-│  Extrinsic: blogPallet.createPost                           │
+│  Extrinsic: blog.createPost                                 │
 │  title: "Hello Polkadot"                                    │
 │  content: "This is my first blog post on parachain!"        │
 └─────────────────────────────────────────────────────────────┘
@@ -592,8 +583,8 @@ https://polkadot.js.org/apps/?rpc=ws://localhost:8845#/extrinsics
 2. **Tại Tab 2 (Parachain):**
    - Chuyển sang **Network → Explorer**
    - Quan sát block mới được tạo (block number tăng lên)
-   - Giao dịch `blogPallet.createPost` xuất hiện trong block với trạng thái **Success**
-   - Kiểm tra sự kiện `blogPallet.PostCreated` (hoặc event tương ứng)
+   - Giao dịch `blog.createPost` xuất hiện trong block với trạng thái **Success**
+   - Kiểm tra sự kiện `blog.PostCreated` (hoặc event tương ứng)
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -601,9 +592,9 @@ https://polkadot.js.org/apps/?rpc=ws://localhost:8845#/extrinsics
 ├─────────────────────────────────────────────────────────────┤
 │  Block #123                                                 │
 │  ├─ Extrinsics:                                             │
-│  │  └─ blogPallet.createPost ✅ Success                     │
+│  │  └─ blog.createPost ✅ Success                     │
 │  └─ Events:                                                 │
-│     └─ blogPallet.PostCreated                               │
+│     └─ blog.PostCreated                               │
 │        - postId: 0                                          │
 │        - author: 5GrwvaEF...                                │
 └─────────────────────────────────────────────────────────────┘
@@ -612,7 +603,7 @@ https://polkadot.js.org/apps/?rpc=ws://localhost:8845#/extrinsics
 #### Bước 4: Kiểm tra dữ liệu đã lưu (Tùy chọn)
 
 1. Tại **Tab 2**, vào **Developer → Chain State**
-2. Chọn: `blogPallet` → `posts` (hoặc storage tương ứng)
+2. Chọn: `blog` → `posts` (hoặc storage tương ứng)
 3. Nhập `postId` (ví dụ: `0`) và nhấn **+**
 4. Kết quả hiển thị nội dung bài viết đã tạo
 
@@ -620,40 +611,28 @@ https://polkadot.js.org/apps/?rpc=ws://localhost:8845#/extrinsics
 
 ```
 ┌──────────────────┐      ┌──────────────────┐
-│   Tab 2:         │      │   Tab 1:         │
-│   Parachain      │      │   Relay Chain    │
-│   localhost:8845 │      │   Paseo          │
+│  Tab 2:          │      │   Tab 1:         │
+│  Parachain       │      │   Relay Chain    │
+│  localhost:8845  │      │   Paseo          │
 └────────┬─────────┘      └────────┬─────────┘
          │                         │
-    ┌────▼────┐                    │
-    │ 1. Tạo  │                    │
-    │ giao    │                    │
-    │ dịch    │                    │
-    │ blog    │                    │
-    └────┬────┘                    │
+    ┌────▼──────────────────┐      │
+    │ 1. Tạo giao dịch blog │      │
+    └────┬──────────────────┘      │
          │                         │
          │ Giao dịch ở             │
          │ trạng thái              │
          │ "Ready"                 │
-         │                    ┌────▼────┐
-         │                    │ 2. Mua  │
-         │                    │ on-dem- │
-         │                    │ and     │
-         │                    │ coret-  │
-         │                    │ ime     │
-         │                    └────┬────┘
+         │                    ┌────▼──────────────────────┐
+         │                    │ 2. Mua on-demand coretime │
+         │                    └────┬──────────────────────┘
          │                         │
          │◄────────────────────────┤
-         │   Coretime được cấp     │
-         │                         │
-    ┌────▼────┐                    │
-    │ 3. Giao │                    │
-    │ dịch    │                    │
-    │ được    │                    │
-    │ đưa     │                    │
-    │ lên     │                    │
-    │ block!  │                    │
-    └─────────┘                    │
+         │   Coretime được cấp 
+         │
+    ┌────▼────────────────────────────┐
+    │ 3. Giao dịch được đưa lên block │
+    └─────────────────────────────────┘
 ```
 
 > **Mẹo demo:**
