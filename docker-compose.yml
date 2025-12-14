@@ -1,0 +1,126 @@
+# ============================================================================
+# Docker Compose cho DoAnCoSo
+# Hỗ trợ: WSL, Ubuntu, macOS
+# ============================================================================
+
+services:
+  # ===========================================================================
+  # Development Environment - Dùng để phát triển và biên dịch
+  # ===========================================================================
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: dacs-dev
+    volumes:
+      # Mount source code
+      - .:/workspace
+      # Cache Cargo để tăng tốc rebuild
+      - cargo-registry:/root/.cargo/registry
+      - cargo-git:/root/.cargo/git
+      - cargo-target:/workspace/target
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    ports:
+      - "40333:40333"  # P2P parachain
+      - "8845:8845"    # RPC parachain
+      - "50343:50343"  # P2P relay chain
+      - "9988:9988"    # RPC relay chain
+    # Tăng shared memory cho build lớn
+    shm_size: '2gb'
+    # Giới hạn tài nguyên hợp lý
+    deploy:
+      resources:
+        limits:
+          memory: 16G
+        reservations:
+          memory: 4G
+
+  # ===========================================================================
+  # Build Service - Chỉ để build production binary
+  # ===========================================================================
+  build:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: dacs-builder
+    volumes:
+      - .:/app
+      - cargo-registry:/usr/local/cargo/registry
+      - cargo-git:/usr/local/cargo/git
+    working_dir: /app
+    command: cargo build --release
+
+  # ===========================================================================
+  # Collator Node Service - Chạy collator trên Paseo testnet
+  # ===========================================================================
+  collator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dacs-collator
+    ports:
+      - "40333:40333"  # P2P parachain
+      - "8845:8845"    # RPC parachain
+      - "50343:50343"  # P2P relay chain
+      - "9988:9988"    # RPC relay chain
+      - "9615:9615"    # Prometheus metrics
+    volumes:
+      - collator-data:/node/data
+      - ./raw_chain_spec.json:/node/raw_chain_spec.json:ro
+    command:
+      - "--collator"
+      - "--chain=/node/raw_chain_spec.json"
+      - "--base-path=/node/data"
+      - "--port=40333"
+      - "--rpc-port=8845"
+      - "--rpc-external"
+      - "--rpc-cors=all"
+      - "--force-authoring"
+      - "--"
+      - "--sync=warp"
+      - "--chain=paseo"
+      - "--port=50343"
+      - "--rpc-port=9988"
+    restart: unless-stopped
+
+  # ===========================================================================
+  # Node Service - Chạy node dev mode (local testing)
+  # ===========================================================================
+  node:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dacs-node
+    ports:
+      - "30333:30333"  # P2P
+      - "9944:9944"    # RPC/WebSocket
+      - "9615:9615"    # Prometheus metrics
+    volumes:
+      - node-data:/node/data
+    command:
+      - "--dev"
+      - "--rpc-external"
+      - "--rpc-cors=all"
+      - "--prometheus-external"
+    restart: unless-stopped
+
+# ===========================================================================
+# Volumes - Persistent storage
+# ===========================================================================
+volumes:
+  cargo-registry:
+    name: dacs-cargo-registry
+  cargo-git:
+    name: dacs-cargo-git
+  cargo-target:
+    name: dacs-cargo-target
+  node-data:
+    name: dacs-node-data
+  collator-data:
+    name: dacs-collator-data
+    name: dacs-cargo-target
+  node-data:
+    name: dacs-node-data

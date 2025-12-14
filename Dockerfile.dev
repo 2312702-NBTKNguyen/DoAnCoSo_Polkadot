@@ -1,0 +1,99 @@
+# ============================================================================
+# Dockerfile.dev - Development Environment
+# Dùng cho việc phát triển và debug trên WSL/Ubuntu/macOS
+# ============================================================================
+
+FROM rust:1.81-bookworm
+
+LABEL maintainer="DoAnCoSo Team <2312702@dlu.edu.vn>"
+LABEL description="Development environment for DACS Substrate Parachain"
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# ============================================================================
+# Cài đặt TẤT CẢ dependencies cho development
+# ============================================================================
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    # Build essentials
+    build-essential \
+    cmake \
+    pkg-config \
+    git \
+    curl \
+    wget \
+    # RocksDB và dependencies
+    librocksdb-dev \
+    libclang-dev \
+    clang \
+    llvm \
+    lld \
+    # Protobuf
+    protobuf-compiler \
+    libprotobuf-dev \
+    # SSL
+    libssl-dev \
+    ca-certificates \
+    # System libs cho RocksDB compression
+    libudev-dev \
+    zlib1g-dev \
+    libbz2-dev \
+    liblz4-dev \
+    libzstd-dev \
+    libsnappy-dev \
+    # Development tools
+    vim \
+    nano \
+    htop \
+    # Cleanup
+    && rm -rf /var/lib/apt/lists/*
+
+# ============================================================================
+# Cấu hình Rust cho Substrate development
+# ============================================================================
+# Cài đặt toolchain cụ thể theo README
+RUN rustup toolchain install 1.86.0 \
+    && rustup default 1.86.0 \
+    && rustup target add wasm32-unknown-unknown --toolchain 1.86.0 \
+    && rustup component add rust-src rustfmt clippy rust-analyzer --toolchain 1.86.0
+
+# ============================================================================
+# Cài đặt công cụ tiện ích Polkadot SDK (Bước 3 trong README)
+# ============================================================================
+# Chain spec builder - Tạo thông số kỹ thuật chuỗi
+RUN cargo install --locked staging-chain-spec-builder@10.0.0
+
+# Polkadot Omni Node - Chạy collator node
+RUN cargo install --locked polkadot-omni-node@0.5.0
+
+# Subkey - Tạo và quản lý keys
+RUN cargo install --locked subkey
+
+# Các tools hữu ích khác
+RUN cargo install cargo-watch cargo-expand
+
+# ============================================================================
+# Environment variables - QUAN TRỌNG cho RocksDB
+# ============================================================================
+ENV ROCKSDB_LIB_DIR=/usr/lib/x86_64-linux-gnu
+ENV SNAPPY_LIB_DIR=/usr/lib/x86_64-linux-gnu
+ENV LZ4_LIB_DIR=/usr/lib/x86_64-linux-gnu
+ENV ZSTD_LIB_DIR=/usr/lib/x86_64-linux-gnu
+ENV LIBCLANG_PATH=/usr/lib/llvm-14/lib
+
+# Tối ưu build
+ENV CARGO_INCREMENTAL=1
+ENV CARGO_NET_RETRY=10
+
+# Sử dụng lld linker để tăng tốc
+ENV RUSTFLAGS="-C link-arg=-fuse-ld=lld"
+
+# ============================================================================
+# Setup workspace
+# ============================================================================
+WORKDIR /workspace
+
+# Volume mount points
+VOLUME ["/workspace", "/root/.cargo/registry", "/root/.cargo/git"]
+
+# Default command
+CMD ["bash"]

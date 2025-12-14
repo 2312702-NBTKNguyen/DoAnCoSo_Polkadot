@@ -1,0 +1,45 @@
+# ============================================================================
+# .dockerignore - Tối ưu Docker build context
+# ============================================================================
+
+# Build artifacts
+target/
+**/target/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Docker files (không cần copy vào context)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Documentation (không cần cho build)
+*.md
+!README.md
+docs/
+
+# Test và benchmark data
+*.log
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local config
+.env
+.env.*
+*.local
+
+# Node data
+data/
+chain_data/

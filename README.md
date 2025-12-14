@@ -2,10 +2,101 @@
 DACS_02_Tìm hiểu ngôn ngữ lập trình Rust và nền tảng blockchain Polkadot.
 
 > - [Mã nguồn](https://github.com/2312702-NBTKNguyen/DoAnCoSo_Polkadot.git) được lưu trữ tại: https://github.com/2312702-NBTKNguyen/DoAnCoSo_Polkadot.git
-> - Toàn bộ hướng dẫn bên dưới được tham khảo từ [Tài liệu chính thức của Polkadot](https://docs.polkadot.com/). 
 > - Tất cả các dòng lệnh cần được thực thi trên **Terminal** (Linux) hoặc **WSL** (Windows).
 
-## 1. Cài đặt các thành phần phụ thuộc (Dependencies)
+---
+
+## Phương pháp 1: Sử dụng Docker (Khuyến nghị)
+
+Docker giúp tránh các lỗi liên quan đến thư viện và đảm bảo môi trường nhất quán trên WSL, Ubuntu, và macOS.
+
+### Yêu cầu
+- **Docker** >= 20.10
+- **Docker Compose** >= 2.0
+- **RAM** >= 8GB (khuyến nghị 16GB)
+
+### Cài đặt Docker
+
+**Ubuntu/WSL:**
+```bash
+# Cài đặt Docker
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER
+newgrp docker
+
+# Kiểm tra
+docker --version
+docker compose version
+```
+
+**macOS:**
+- Tải và cài đặt [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+
+### Sử dụng nhanh
+
+```bash
+# Clone dự án
+git clone https://github.com/2312702-NBTKNguyen/DoAnCoSo_Polkadot.git
+cd DoAnCoSo_Polkadot
+
+# Cấp quyền thực thi script
+chmod +x scripts/docker-build.sh
+
+# Xem tất cả commands
+./scripts/docker-build.sh help
+```
+
+### Workflow đầy đủ với Docker
+
+```bash
+# 1. Vào môi trường development
+./scripts/docker-build.sh dev
+
+# 2. Build project (trong container hoặc bên ngoài)
+./scripts/docker-build.sh build
+
+# 3. Tạo chain spec (thay 4814 bằng Para ID của bạn)
+./scripts/docker-build.sh chain-spec 4814
+
+# 4. Chỉnh sửa plain_chain_spec.json theo hướng dẫn bên dưới
+
+# 5. Chuyển đổi sang raw chain spec
+./scripts/docker-build.sh chain-spec-raw
+
+# 6. Xuất genesis files
+./scripts/docker-build.sh export-genesis
+
+# 7. Tạo node key
+./scripts/docker-build.sh generate-node-key
+
+# 8. Chạy collator
+./scripts/docker-build.sh run-collator
+
+# 9. Chèn session key
+./scripts/docker-build.sh insert-key
+
+# 10. Xem logs
+./scripts/docker-build.sh logs collator
+```
+
+### Các lệnh Docker hữu ích
+
+| Lệnh | Mô tả |
+|------|-------|
+| `./scripts/docker-build.sh dev` | Vào môi trường development |
+| `./scripts/docker-build.sh build` | Build release binary |
+| `./scripts/docker-build.sh test` | Chạy tests |
+| `./scripts/docker-build.sh run-collator` | Chạy collator node |
+| `./scripts/docker-build.sh stop-collator` | Dừng collator |
+| `./scripts/docker-build.sh clean` | Xóa Docker resources |
+
+---
+
+## Phương pháp 2: Cài đặt thủ công (Native)
+
+> **Lưu ý:** Nếu gặp lỗi RocksDB khi biên dịch, hãy sử dụng [Phương pháp 1: Docker](#-phương-pháp-1-sử-dụng-docker-khuyến-nghị).
+
+### 1. Cài đặt các thành phần phụ thuộc (Dependencies)
 
 Trước khi bắt đầu, đảm bảo hệ thống đã được cài đặt các thư viện cần thiết.
 
@@ -54,9 +145,12 @@ rustup default stable
 rustup update
 rustup target add wasm32-unknown-unknown
 rustup component add rust-src
+
+# (Tùy chọn) Fix lỗi RocksDB - cài thêm các thư viện sau nếu gặp lỗi
+sudo apt install --assume-yes librocksdb-dev liblz4-dev libzstd-dev libsnappy-dev libbz2-dev
 ```
 
-## 2. Cài đặt toolchain
+### 2. Cài đặt toolchain
 
 Cài đặt phiên bản Rust cụ thể (1.86.0) để đảm bảo tính tương thích.
 
@@ -67,7 +161,7 @@ rustup target add wasm32-unknown-unknown --toolchain 1.86.0
 rustup component add rust-src --toolchain 1.86.0
 ```
 
-## 3. Cài đặt công cụ tiện ích
+### 3. Cài đặt công cụ tiện ích
 
 - **Chain spec builder** (Tiện ích Polkadot SDK dùng để tạo thông số kỹ thuật chuỗi):
 
@@ -81,7 +175,7 @@ rustup component add rust-src --toolchain 1.86.0
   cargo install --locked polkadot-omni-node@0.5.0
   ```
 
-## 4. Cài đặt dự án
+### 4. Cài đặt dự án
 
 Sử dụng mã nguồn được lưu trữ trong thư mục `./DoAnCoSo_Polkadot` 
 **Hoặc** Sao chép kho lưu trữ mẫu:
@@ -101,6 +195,8 @@ Biên dịch runtime:
    ```
 
 > Ghi chú: Thời gian biên dịch phụ thuộc vào cấu hình máy (khoảng 20–90 phút).
+
+---
 
 ## 5. Triển khai lên Testnet Paseo
 
@@ -362,4 +458,265 @@ Kết quả mong đợi: `{ "jsonrpc":"2.0", "result":null, "id":1 }`.
 
 Sau khi collator được đồng bộ hóa với chuỗi chuyển tiếp (RelayChain) Paseo và Parathread hoàn tất việc tích hợp, khi đó sẽ sẵn sàng để bắt đầu tạo khối.
 
-### 5.4. 
+### 5.4. Cấu hình Coretime
+Sau khi triển khai thành công parachain lên Paseo TestNet, bước tiếp theo là cấu hình **Coretime**. Đây là cơ chế phân bổ tài nguyên xác thực từ Relay Chain cho các tác vụ cụ thể, ví dụ như parachain. Một parachain chỉ có thể sản xuất và hoàn tất khối (finalize) trên Relay Chain khi đã có được Coretime.
+
+Có hai phương thức để sở hữu Coretime:
+
+* **On-demand coretime (Theo nhu cầu):** Cho phép mua Coretime theo từng khối (block-by-block).
+* **Bulk coretime (Số lượng lớn):** Cho phép sở hữu toàn bộ hoặc một phần của một lõi (core). Loại này được mua theo khoảng thời gian, tối đa lên đến 28 ngày và cần được gia hạn khi hết hạn thuê.
+
+#### Hướng dẫn sử dụng On-demand Coretime
+
+**Bước 1.** Truy cập Polkadot.js Apps kết nối với **Paseo Relay Chain**:
+
+- URL: https://polkadot.js.org/apps/?rpc=wss://paseo.dotters.network#/extrinsics
+
+**Bước 2.** Đảm bảo tài khoản có đủ PAS token:
+
+- Kiểm tra số dư tại tab **Accounts**
+- Nếu cần thêm token, sử dụng [Faucet](https://faucet.polkadot.io/) (đã hướng dẫn ở bước 5.1)
+
+**Bước 3.** Đặt On-demand Order:
+
+1. Vào tab **Developer → Extrinsics**
+2. Chọn tài khoản có PAS token
+3. Chọn extrinsic: `onDemand` → `placeOrderKeepAlive`
+4. Điền các tham số:
+   - `maxAmount`: Số PAS tối đa bạn sẵn sàng trả (ví dụ: `1000000000000` = 1 PAS)
+   - `paraId`: Para ID của parachain (`5100` cho bước `5.2 Cách 1 – Sử dụng tài nguyên sẵn có` hoặc Para ID đã đăng ký trong bước `5.3 Cách 2 – Para ID và Parathread riêng`)
+5. Nhấn **Submit Transaction** và ký giao dịch
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Extrinsic: onDemand.placeOrderKeepAlive                    │
+├─────────────────────────────────────────────────────────────┤
+│  maxAmount: 1000000000000 (1 PAS)                           │
+│  paraId: 5100                                               │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Bước 4.** Kiểm tra kết quả:
+
+- Vào tab **Network → Explorer**
+- Tìm sự kiện `onDemand.OnDemandOrderPlaced` để xác nhận order thành công
+- Sau khi order được xử lý, parachain sẽ được phép tạo và xác thực một block
+
+> **Lưu ý quan trọng:**
+> - Mỗi order chỉ có hiệu lực cho một block
+> - Order sẽ được xử lý theo thứ tự hàng đợi (queue)
+
+**So sánh On-demand vs Bulk Coretime:**
+
+| Tiêu chí | On-demand | Bulk |
+|----------|-----------|------|
+| Chi phí | Theo block | Theo tháng (28 ngày) |
+| Phù hợp với | Dự án mới, traffic thấp | Dự án ổn định, traffic cao |
+| Rủi ro giá | Biến động theo nhu cầu | Cố định sau khi mua |
+| Yêu cầu | Đặt order liên tục | Mua một lần, dùng cả tháng |
+
+### 5.5. Demo: Thực hiện giao dịch với Blog Pallet
+
+Phần này hướng dẫn cách demo việc tạo giao dịch trên parachain và sử dụng on-demand coretime để đưa giao dịch lên block.
+
+#### Chuẩn bị: Mở 2 tab Polkadot.js Apps
+
+| Tab | Kết nối đến | Mục đích |
+|-----|-------------|----------|
+| **Tab 1** | `wss://paseo.dotters.network` (Paseo Relay Chain) | Mua on-demand coretime |
+| **Tab 2** | `ws://localhost:8845` (Parachain local) | Thực hiện giao dịch blog-pallet |
+
+**Mở Tab 1 - Paseo Relay Chain:**
+```
+https://polkadot.js.org/apps/?rpc=wss://paseo.dotters.network#/extrinsics
+```
+
+**Mở Tab 2 - Parachain Local:**
+```
+https://polkadot.js.org/apps/?rpc=ws://localhost:8845#/extrinsics
+```
+
+#### Bước 1: Tạo giao dịch Blog Pallet (Tab 2 - Parachain)
+
+1. Chuyển sang **Tab 2** (kết nối `ws://localhost:8845`)
+2. Vào **Developer → Extrinsics**
+3. Chọn tài khoản có token (ví dụ: tài khoản sudo)
+4. Chọn extrinsic: `blogPallet` → chọn hàm muốn gọi, ví dụ:
+   - `createPost(title, content)` - Tạo bài viết mới
+   - `updatePost(postId, title, content)` - Cập nhật bài viết
+   - `deletePost(postId)` - Xóa bài viết
+5. Điền các tham số cần thiết
+6. Nhấn **Submit Transaction** và ký giao dịch
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Tab 2: Parachain (ws://localhost:8845)                     │
+├─────────────────────────────────────────────────────────────┤
+│  Extrinsic: blogPallet.createPost                           │
+│  title: "Hello Polkadot"                                    │
+│  content: "This is my first blog post on parachain!"        │
+└─────────────────────────────────────────────────────────────┘
+```
+
+7. Sau khi submit, giao dịch sẽ ở trạng thái **Ready** (chờ xử lý)
+   - Kiểm tra tại **Network → Explorer** - giao dịch xuất hiện trong pending/ready pool
+   - Giao dịch chưa được đưa vào block vì parachain chưa có coretime
+
+#### Bước 2: Mua On-demand Coretime (Tab 1 - Relay Chain)
+
+1. Chuyển sang **Tab 1** (kết nối `wss://paseo.dotters.network`)
+2. Vào **Developer → Extrinsics**
+3. Chọn tài khoản có PAS token
+4. Chọn extrinsic: `onDemand` → `placeOrderKeepAlive`
+5. Điền tham số:
+   - `maxAmount`: `1000000000000` (1 PAS)
+   - `paraId`: `5100` (hoặc Para ID của bạn)
+6. Nhấn **Submit Transaction** và ký giao dịch
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Tab 1: Paseo Relay Chain (wss://paseo.dotters.network)     │
+├─────────────────────────────────────────────────────────────┤
+│  Extrinsic: onDemand.placeOrderKeepAlive                    │
+│  maxAmount: 1000000000000 (1 PAS)                           │
+│  paraId: 5100                                               │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### Bước 3: Xác nhận giao dịch được đưa lên block
+
+1. **Tại Tab 1 (Relay Chain):**
+   - Chờ sự kiện `onDemand.OnDemandOrderPlaced` xuất hiện trong Explorer
+   - Điều này xác nhận parachain đã được cấp slot để tạo block
+
+2. **Tại Tab 2 (Parachain):**
+   - Chuyển sang **Network → Explorer**
+   - Quan sát block mới được tạo (block number tăng lên)
+   - Giao dịch `blogPallet.createPost` xuất hiện trong block với trạng thái **Success**
+   - Kiểm tra sự kiện `blogPallet.PostCreated` (hoặc event tương ứng)
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Kết quả trên Tab 2 - Parachain Explorer                    │
+├─────────────────────────────────────────────────────────────┤
+│  Block #123                                                 │
+│  ├─ Extrinsics:                                             │
+│  │  └─ blogPallet.createPost ✅ Success                     │
+│  └─ Events:                                                 │
+│     └─ blogPallet.PostCreated                               │
+│        - postId: 0                                          │
+│        - author: 5GrwvaEF...                                │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### Bước 4: Kiểm tra dữ liệu đã lưu (Tùy chọn)
+
+1. Tại **Tab 2**, vào **Developer → Chain State**
+2. Chọn: `blogPallet` → `posts` (hoặc storage tương ứng)
+3. Nhập `postId` (ví dụ: `0`) và nhấn **+**
+4. Kết quả hiển thị nội dung bài viết đã tạo
+
+#### Tóm tắt quy trình Demo
+
+```
+┌──────────────────┐      ┌──────────────────┐
+│   Tab 2:         │      │   Tab 1:         │
+│   Parachain      │      │   Relay Chain    │
+│   localhost:8845 │      │   Paseo          │
+└────────┬─────────┘      └────────┬─────────┘
+         │                         │
+    ┌────▼────┐                    │
+    │ 1. Tạo  │                    │
+    │ giao    │                    │
+    │ dịch    │                    │
+    │ blog    │                    │
+    └────┬────┘                    │
+         │                         │
+         │ Giao dịch ở             │
+         │ trạng thái              │
+         │ "Ready"                 │
+         │                    ┌────▼────┐
+         │                    │ 2. Mua  │
+         │                    │ on-dem- │
+         │                    │ and     │
+         │                    │ coret-  │
+         │                    │ ime     │
+         │                    └────┬────┘
+         │                         │
+         │◄────────────────────────┤
+         │   Coretime được cấp     │
+         │                         │
+    ┌────▼────┐                    │
+    │ 3. Giao │                    │
+    │ dịch    │                    │
+    │ được    │                    │
+    │ đưa     │                    │
+    │ lên     │                    │
+    │ block!  │                    │
+    └─────────┘                    │
+```
+
+> **Mẹo demo:**
+> - Mở 2 cửa sổ browser cạnh nhau để dễ theo dõi
+> - Tạo giao dịch blog trước, sau đó mới mua coretime để thấy rõ sự liên kết
+> - Có thể tạo nhiều giao dịch pending, sau đó mua coretime một lần để xử lý tất cả
+
+---
+
+## Troubleshooting
+
+### Lỗi RocksDB trên Ubuntu/WSL
+
+```bash
+# Cài đặt đầy đủ dependencies
+sudo apt install --assume-yes \
+    librocksdb-dev \
+    libclang-dev \
+    clang \
+    llvm \
+    liblz4-dev \
+    libzstd-dev \
+    libsnappy-dev \
+    libbz2-dev
+
+# Hoặc sử dụng Docker (khuyến nghị)
+./scripts/docker-build.sh build
+```
+
+### Lỗi "out of memory" khi build
+
+```bash
+# Tăng swap space
+sudo fallocate -l 8G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+
+# Hoặc với Docker, chỉnh memory limit trong docker-compose.yml
+```
+
+### Tốc độ build chậm
+
+```bash
+# Sử dụng cargo check trước
+cargo check --release
+
+# Hoặc dùng Docker với cache
+./scripts/docker-build.sh build
+```
+
+---
+
+## Thành viên nhóm
+
+| MSSV | Họ và tên | Email |
+|------|-----------|-------|
+| 2312622 | Nguyễn Đức Hoàng | 2312622@dlu.edu.vn |
+| 2312635 | Trần Đình Việt Huy | 2312635@dlu.edu.vn |
+| 2312675 | Hồ Quốc Long | 2312675@dlu.edu.vn |
+| 2312702 | Nguyễn Bá Thiều Khôi Nguyên | 2312702@dlu.edu.vn |
+
+---
+
+## Tài liệu tham khảo:
+- [Polkadot](https://docs.polkadot.com/)
