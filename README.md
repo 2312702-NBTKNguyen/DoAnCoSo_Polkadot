@@ -583,7 +583,7 @@ https://polkadot.js.org/apps/?rpc=ws://localhost:8845#/extrinsics
 2. **Tại Tab 2 (Parachain):**
    - Chuyển sang **Network → Explorer**
    - Quan sát block mới được tạo (block number tăng lên)
-   - Giao dịch `blog.createPost` xuất hiện trong block với trạng thái **Success**
+   - Giao dịch `blog.createPost` xuất hiện trong block với trạng thái `Success`
    - Kiểm tra sự kiện `blog.PostCreated` (hoặc event tương ứng)
 
 ```
@@ -592,9 +592,9 @@ https://polkadot.js.org/apps/?rpc=ws://localhost:8845#/extrinsics
 ├─────────────────────────────────────────────────────────────┤
 │  Block #123                                                 │
 │  ├─ Extrinsics:                                             │
-│  │  └─ blog.createPost ✅ Success                     │
+│  │  └─ blog.createPost       #Success                       │
 │  └─ Events:                                                 │
-│     └─ blog.PostCreated                               │
+│     └─ blog.PostCreated                                     │
 │        - postId: 0                                          │
 │        - author: 5GrwvaEF...                                │
 └─────────────────────────────────────────────────────────────┘
